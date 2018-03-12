@@ -12,7 +12,6 @@ const PARAM_SEARCH = 'query=';
 class App extends Component {
   constructor(props){
     super(props);
-    console.log('Constructor');
     this.state = {
       result: null,
       searchTerm: DEFAULT_QUERY
@@ -20,6 +19,7 @@ class App extends Component {
 
     this.onDismiss = this.onDismiss.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
+    this.onSearchSubmit = this.onSearchSubmit.bind(this);
   }
 
   onDismiss(id) {
@@ -35,38 +35,45 @@ class App extends Component {
     });
   }
 
+  onSearchSubmit(event) {
+    const {searchTerm} = this.state;
+    this.fetchSearchTopStories(searchTerm);
+    event.preventDefault();
+  }
+
+  fetchSearchTopStories(searchTerm) {
+    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
+      .then(response => response.json())
+      .then(result => this.setSearchTopStories(result))
+      .catch(error => error);
+  }
+
   setSearchTopStories(result) {
-    console.log(result);
     this.setState({result});
   }
 
   render() {
-    console.log('Render');
     const {searchTerm, result} = this.state;
     return (
       <div className="page">
         <div className="interactions">
           <Search 
             value={searchTerm} 
-            onChange={this.onSearchChange}>
+            onChange={this.onSearchChange}
+            onSubmit={this.onSearchSubmit}>
             Search
           </Search>
         </div>
         {result && <Table 
           list={result.hits} 
-          searchTerm={searchTerm} 
           onDismiss={this.onDismiss}/> }
       </div>
     );
   }
 
   componentDidMount(){
-    console.log('componentDidMount');
     const {searchTerm} = this.state;
-    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
-      .then(response => response.json())
-      .then(result => this.setSearchTopStories(result))
-      .catch(error => error);
+    this.fetchSearchTopStories(searchTerm);
   }
 }
 
