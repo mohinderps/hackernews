@@ -22,10 +22,10 @@ class App extends Component {
     this.onSearchChange = this.onSearchChange.bind(this);
   }
 
-  onDismiss(buttonId) {
-    const updatedList = this.state.list.filter((item) => item.objectID !== buttonId);
+  onDismiss(id) {
+    const updatedHits = this.state.result.hits.filter((item) => item.objectID !== id);
     this.setState({
-      list: updatedList
+      result: {...this.state.result, hits: updatedHits}
     });
   }
 
@@ -36,16 +36,13 @@ class App extends Component {
   }
 
   setSearchTopStories(result) {
-    console.log(this);
+    console.log(result);
     this.setState({result});
   }
 
   render() {
     console.log('Render');
     const {searchTerm, result} = this.state;
-    if(!result) {
-      return null;
-    }
     return (
       <div className="page">
         <div className="interactions">
@@ -55,10 +52,10 @@ class App extends Component {
             Search
           </Search>
         </div>
-        <Table 
-          list={result} 
+        {result && <Table 
+          list={result.hits} 
           searchTerm={searchTerm} 
-          onDismiss={this.onDismiss}/>
+          onDismiss={this.onDismiss}/> }
       </div>
     );
   }
@@ -68,7 +65,7 @@ class App extends Component {
     const {searchTerm} = this.state;
     fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
       .then(response => response.json())
-      .then(result => this.setSearchTopStories(result.hits))
+      .then(result => this.setSearchTopStories(result))
       .catch(error => error);
   }
 }
